@@ -49,15 +49,19 @@ def run():
     os.environ['__LITHOPS_ACTIVATION_ID'] = act_id
     os.environ['__LITHOPS_BACKEND'] = 'Google Cloud Run'
 
-    if 'remote_invoker' in message:
-        logger.info(f"Lithops v{__version__} - Starting GCP Cloud Run invoker")
-        function_invoker(message)
-    else:
-        logger.info(f"Lithops v{__version__} - Starting GCP Cloud Run execution")
-        function_handler(message)
+    try:
+        if 'remote_invoker' in message:
+            logger.info(f"Lithops v{__version__} - Starting GCP Cloud Run invoker")
+            function_invoker(message)
+        else:
+            logger.info(f"Lithops v{__version__} - Starting GCP Cloud Run execution")
+            function_handler(message)
 
-    response = flask.jsonify({"activationId": act_id})
-    response.status_code = 202
+        response = flask.jsonify({"activationId": act_id})
+        response.status_code = 202
+    except Exception as e:
+        response = flask.jsonify({'error': str(e)})
+        response.status_code = 500
 
     return complete(response)
 
